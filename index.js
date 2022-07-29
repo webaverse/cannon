@@ -54,6 +54,8 @@ export default () => {
 
     cannonFlash.position.copy(cannonObj.position).add(new THREE.Vector3(0,0,-0.5).applyQuaternion(cannonObj.quaternion));
     cannonFlash.updateMatrixWorld();
+    
+    fireDelay = Math.floor(Math.random() * (5000 - 1000) ) + 1000;
 
     if((timestamp - lastShootTime) > fireDelay) {
       lastShootTime = timestamp;
