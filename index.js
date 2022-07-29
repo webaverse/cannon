@@ -5,7 +5,7 @@ const {useApp, useFrame, usePhysics, useLocalPlayer, useLoaders, useCameraManage
 const baseUrl = import.meta.url.replace(/(\/)[^\/\\]*$/, '$1');
 
 let lastShootTime = 1;
-let fireDelay = 1000;
+let fireDelay = 3000;
 let cubeArray = [];
 let cannonObj = null;
 let origin = new THREE.Vector3(0,0,0);
