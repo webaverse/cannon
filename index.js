@@ -92,7 +92,7 @@ export default () => {
   });
 
   (async () => {
-    const u = `${baseUrl}cannon/cannon.glb`;
+    const u = `${baseUrl}cannon.glb`;
     let o = await new Promise((accept, reject) => {
       const {gltfLoader} = useLoaders();
       gltfLoader.load(u, accept, function onprogress() {}, reject);
