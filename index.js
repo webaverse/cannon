@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, usePhysics, useLocalPlayer, useLoaders, useCameraManager, useCleanup} = metaversefile;
+const {useApp, useFrame, usePhysics, useLocalPlayer, useLoaders, useCameraManager} = metaversefile;
 
 const baseUrl = import.meta.url.replace(/(\/)[^\/\\]*$/, '$1');
 
@@ -13,7 +13,6 @@ let cannonFlash = null;
 
 export default () => {
   const app = useApp();
-  app.subApps = [];
   const localPlayer = useLocalPlayer();
   const physics = usePhysics();
   const cameraManager = useCameraManager();
@@ -116,11 +115,9 @@ export default () => {
     cannonFlash = new THREE.PointLight( 0xfac491, 0, 5 );
     cannonFlash.position.copy(cannonObj.position);
     app.add( cannonFlash );
-    app.subApps.push(cannonFlash);
     
     physicsId = physics.addGeometry(o);
     
-    app.subApps.push(physicsId);
     //physicsIds.push(physicsId);
   })();
   app.removePhysicsObjects = () => {
