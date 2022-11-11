@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, usePhysics, useLocalPlayer, useLoaders, useCameraManager} = metaversefile;
+const {useApp, useFrame, usePhysics, useLocalPlayer, useLoaders, useCameraManager, useCleanup} = metaversefile;
 
 const baseUrl = import.meta.url.replace(/(\/)[^\/\\]*$/, '$1');
 
@@ -13,10 +13,11 @@ let cannonFlash = null;
 
 export default () => {
   const app = useApp();
+  app.subApps = [];
   const localPlayer = useLocalPlayer();
   const physics = usePhysics();
   const cameraManager = useCameraManager();
-
+  
 
 
   const _shootTowardsPoint = (obj, pos) => {
@@ -35,11 +36,16 @@ export default () => {
 
 
   }
-
-  useFrame(({timestamp}) => {
+  let physicsId = null;
+  let removePhysic = false;
+  const frame = useFrame(({timestamp}) => {
 
     if(!localPlayer || !cannonObj || !cannonFlash) {
       return;
+    }
+    if (removePhysic && physicsId) {
+      physics.removeGeometry(physicsId);
+      physicsId = null;
     }
 
     let lookAtPosition = new THREE.Vector3();
@@ -79,11 +85,11 @@ export default () => {
 
       cannonFlash.intensity = 100;
       cameraManager.addShake( cannonObj.position, 0.2, 60, 500);
+      
+      setTimeout(() => {
+        cannonFlash.intensity = 0;
 
-       setTimeout(() => {
-         cannonFlash.intensity = 0;
-
-       }, 70);
+      }, 70);
      }
 
      for (var i = 0; i < cubeArray.length; i++) {
@@ -92,7 +98,7 @@ export default () => {
        cubeArray[i].updateMatrixWorld();
      }
   });
-
+  
   (async () => {
     const u = `${baseUrl}cannon.glb`;
     let o = await new Promise((accept, reject) => {
@@ -110,11 +116,19 @@ export default () => {
     cannonFlash = new THREE.PointLight( 0xfac491, 0, 5 );
     cannonFlash.position.copy(cannonObj.position);
     app.add( cannonFlash );
+    app.subApps.push(cannonFlash);
     
+    physicsId = physics.addGeometry(o);
     
-    const physicsId = physics.addGeometry(o);
+    app.subApps.push(physicsId);
     //physicsIds.push(physicsId);
   })();
+  app.removePhysicsObjects = () => {
+    removePhysic = true;
+  }
+  app.removeSubApps = () => {
+    frame.cleanup()
+  }
   
   return app;
 };
