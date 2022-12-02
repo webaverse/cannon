@@ -16,7 +16,7 @@ export default () => {
   const localPlayer = useLocalPlayer();
   const physics = usePhysics();
   const cameraManager = useCameraManager();
-
+  
 
 
   const _shootTowardsPoint = (obj, pos) => {
@@ -35,11 +35,16 @@ export default () => {
 
 
   }
-
-  useFrame(({timestamp}) => {
+  let physicsId = null;
+  let removePhysic = false;
+  const frame = useFrame(({timestamp}) => {
 
     if(!localPlayer || !cannonObj || !cannonFlash) {
       return;
+    }
+    if (removePhysic && physicsId) {
+      physics.removeGeometry(physicsId);
+      physicsId = null;
     }
 
     let lookAtPosition = new THREE.Vector3();
@@ -79,11 +84,11 @@ export default () => {
 
       cannonFlash.intensity = 100;
       cameraManager.addShake( cannonObj.position, 0.2, 60, 500);
+      
+      setTimeout(() => {
+        cannonFlash.intensity = 0;
 
-       setTimeout(() => {
-         cannonFlash.intensity = 0;
-
-       }, 70);
+      }, 70);
      }
 
      for (var i = 0; i < cubeArray.length; i++) {
@@ -92,7 +97,7 @@ export default () => {
        cubeArray[i].updateMatrixWorld();
      }
   });
-
+  
   (async () => {
     const u = `${baseUrl}cannon.glb`;
     let o = await new Promise((accept, reject) => {
@@ -111,10 +116,16 @@ export default () => {
     cannonFlash.position.copy(cannonObj.position);
     app.add( cannonFlash );
     
+    physicsId = physics.addGeometry(o);
     
-    const physicsId = physics.addGeometry(o);
     //physicsIds.push(physicsId);
   })();
+  app.removePhysicsObjects = () => {
+    removePhysic = true;
+  }
+  app.removeSubApps = () => {
+    frame.cleanup()
+  }
   
   return app;
 };
